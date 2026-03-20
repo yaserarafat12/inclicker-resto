@@ -13,6 +13,7 @@ import {
 import SceneArea from './components/SceneArea';
 import UpgradeTab from './components/UpgradeTab';
 import ContentTabs from './components/ContentTabs';
+import VNReader from './components/VNReader';
 
 export default function App() {
   // ── State ──────────────────────────────────────────────
@@ -28,6 +29,7 @@ export default function App() {
   const [tab,        setTab]          = useState('upgrade');
   const [modal,      setModal]        = useState(false); // konfirmasi pindah lokasi
   const [offlineModal, setOfflineModal] = useState(null); // { earned }
+  const [vnChapter,   setVnChapter]     = useState(null);
 
   // ── Rush hour ──────────────────────────────────────────
   const [rushActive,  setRushActive]  = useState(false);
@@ -401,7 +403,10 @@ export default function App() {
             <ContentTabs.Menu loc={loc} tl={tl} />
           )}
           {tab === 'cerita' && (
-            <ContentTabs.Cerita loc={loc} tl={tl} />
+            <ContentTabs.Cerita loc={loc} tl={tl} onOpenChapter={setVnChapter} />
+          )}
+          {vnChapter !== null && (
+            <VNReader chapterId={vnChapter} onClose={() => setVnChapter(null)} />
           )}
         </div>
 
