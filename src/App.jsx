@@ -3,6 +3,7 @@
 // Main state, game loop, layout utama.
 // ═══════════════════════════════════════════════════════
 
+import { BACKGROUNDS } from './assets/backgrounds/index'
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { LOCATIONS, UPGRADES, RUSH_HOUR, COMBO } from './constants';
 import {
@@ -305,6 +306,7 @@ export default function App() {
         {/* Scene area */}
         <SceneArea
           loc={loc}
+          bgImage={BACKGROUNDS[locIdx]}
           money={money}
           ips={effectiveIps}
           ti={effectiveTi}

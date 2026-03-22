@@ -69,7 +69,7 @@ function FloatText({ floats, accent }) {
 }
 
 // ── Main SceneArea ──────────────────────────────────────
-export default function SceneArea({ loc, money, ips, ti, tapCount, playerName, rushActive, onTap }) {
+export default function SceneArea({ loc, money, ips, ti, tapCount, playerName, rushActive, bgImage, onTap }) {
   const [tapping,  setTapping]  = useState(false);
   const [floats,   setFloats]   = useState([]);
   const [ripples,  setRipples]  = useState([]);
@@ -104,10 +104,14 @@ export default function SceneArea({ loc, money, ips, ti, tapCount, playerName, r
         onClick={handleTap}
         style={{
           height: 280,
-          // TODO: ganti dengan import gambar dari src/assets/backgrounds/
-          // background: `url(${bgImage}) center/cover`,
+          backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+          backgroundSize: 'contain',
+          backgroundPosition: 'center bottom',
+          backgroundRepeat: 'no-repeat',
           background: rushActive
-            ? `linear-gradient(160deg, ${loc.accent}33, ${loc.dim})`
+            ? `url(${bgImage}) center bottom/contain no-repeat, linear-gradient(160deg, ${loc.accent}33, ${loc.dim})`
+            : bgImage
+            ? `url(${bgImage}) center bottom/contain no-repeat, linear-gradient(160deg, ${loc.dim}, #030303)`
             : `linear-gradient(160deg, ${loc.dim}, #030303)`,
           cursor: 'pointer',
           position: 'relative',
