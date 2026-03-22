@@ -15,12 +15,12 @@ import SceneArea from './components/SceneArea';
 import UpgradeTab from './components/UpgradeTab';
 import ContentTabs from './components/ContentTabs';
 import VNReader from './components/VNReader';
+import OnboardingScreen from './components/OnboardingScreen';
 
 export default function App() {
   // ── State ──────────────────────────────────────────────
   const [playerName, setPlayerName]   = useState('');
   const [showNameInput, setShowNameInput] = useState(false);
-  const [nameInput, setNameInput]     = useState('');
 
   const [money,      setMoney]        = useState(500);
   const [totalEarned, setTotalEarned] = useState(500);
@@ -161,13 +161,7 @@ export default function App() {
     saveGame({ playerName, money, totalEarned, tapCount, upgrades: { alat: 0, bahan: 0, tempat: 0, nyaman: 0, visib: 0 }, locIdx: locIdx + 1 });
   }, [playerName, money, totalEarned, tapCount, locIdx]);
 
-  // ── Name input submit ──────────────────────────────────
-  const onSubmitName = useCallback(() => {
-    const name = nameInput.trim() || 'Player';
-    setPlayerName(name);
-    setShowNameInput(false);
-    saveGame({ playerName: name, money: 500, totalEarned: 500, tapCount: 0, upgrades: { alat: 0, bahan: 0, tempat: 0, nyaman: 0, visib: 0 }, locIdx: 0 });
-  }, [nameInput]);
+
 
   // ── Tabs config ────────────────────────────────────────
   const TABS = [
@@ -181,48 +175,21 @@ export default function App() {
   // ══════════════════════════════════════════════════════
   return (
     <>
-      {/* ── Name Input Screen ── */}
+      {/* ── Onboarding Screen ── */}
       {showNameInput && (
-        <div style={{
-          position: 'fixed', inset: 0, background: '#040404',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          zIndex: 500, gap: 20, padding: '0 32px',
-        }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 36, letterSpacing: 2, color: '#e8a245' }}>
-            INCLICKER: RESTO
-          </div>
-          <div style={{ fontSize: 14, color: '#666', textAlign: 'center' }}>
-            Siapa nama lo?
-          </div>
-          <input
-            autoFocus
-            value={nameInput}
-            onChange={e => setNameInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && onSubmitName()}
-            placeholder="Ketik nama lo..."
-            maxLength={20}
-            style={{
-              width: '100%', maxWidth: 280, padding: '12px 16px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 10, color: '#fff', fontSize: 16,
-              fontFamily: "'DM Sans', sans-serif", outline: 'none',
-              textAlign: 'center',
-            }}
-          />
-          <button
-            onClick={onSubmitName}
-            style={{
-              width: '100%', maxWidth: 280, padding: '13px',
-              background: '#e8a245', border: 'none', borderRadius: 10,
-              color: '#040404', fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 700, fontSize: 15, cursor: 'pointer',
-            }}
-          >
-            Mulai →
-          </button>
-        </div>
+        <OnboardingScreen
+          onComplete={({ gender, name }) => {
+            setPlayerName(name);
+            setShowNameInput(false);
+            saveGame({
+              playerName: name, gender,
+              money: 500, totalEarned: 500,
+              tapCount: 0,
+              upgrades: { alat: 0, bahan: 0, tempat: 0, nyaman: 0, visib: 0 },
+              locIdx: 0,
+            });
+          }}
+        />
       )}
 
       {/* ── Offline Income Modal ── */}
