@@ -1,393 +1,352 @@
 // ═══════════════════════════════════════════════════════
-// INCLICKER: RESTO — OnboardingScreen.jsx
-// Flow: Splash → Pilih Gender → Input Nama → VN Intro → Game
+// INCLICKER: RESTO — OnboardingScreen.jsx v2
+// Mobile-first, contrast tinggi, teks jelas
 // ═══════════════════════════════════════════════════════
 
 import { useState, useEffect } from 'react';
 
-// ── VN Intro panels (5 panel sebelum masuk game) ────────
 const INTRO_PANELS = [
-  {
-    caption: 'Tiga kali gagal. Saldo: Rp 47.000. Umur: 21 tahun.',
-    sub: 'Naraya, Jawa Tengah',
-  },
-  {
-    caption: '"Resep ini bukan sekadar masakan. Ini nyawa keluarga kita."',
-    sub: '— Nenek',
-  },
-  {
-    caption: 'Modal: Rp 200.000. Resep aneh yang belum pernah ada. Dan nekat.',
-    sub: 'Hari pertama buka warteg',
-  },
-  {
-    caption: 'Hari pertama buka. Nol pembeli. Tapi lo masih masak.',
-    sub: 'Gang sempit Naraya',
-  },
-  {
-    caption: 'Dan dari sini — semuanya berubah.',
-    sub: 'Mulai perjalananmu',
-  },
+  { caption: 'Tiga kali gagal. Saldo: Rp 47.000. Umur: 21 tahun.', sub: 'Naraya, Jawa Tengah' },
+  { caption: '"Resep ini bukan sekadar masakan. Ini nyawa keluarga kita."', sub: '— Nenek' },
+  { caption: 'Modal: Rp 200.000. Resep aneh yang belum pernah ada. Dan nekat.', sub: 'Hari pertama buka warteg' },
+  { caption: 'Hari pertama buka. Nol pembeli. Tapi lo masih masak.', sub: 'Gang sempit Naraya' },
+  { caption: 'Dan dari sini — semuanya berubah.', sub: 'Mulai perjalananmu' },
 ];
 
 export default function OnboardingScreen({ onComplete }) {
-  const [step, setStep]         = useState('splash');   // splash | gender | name | intro
-  const [gender, setGender]     = useState(null);        // 'male' | 'female'
+  const [step,      setStep]      = useState('splash');
+  const [gender,    setGender]    = useState(null);
   const [nameInput, setNameInput] = useState('');
-  const [panelIdx, setPanelIdx] = useState(0);
-  const [fadeIn, setFadeIn]     = useState(true);
+  const [panelIdx,  setPanelIdx]  = useState(0);
+  const [visible,   setVisible]   = useState(true);
 
-  // Auto advance splash setelah 2.5 detik
+  const fade = (next, delay = 350) => {
+    setVisible(false);
+    setTimeout(() => { next(); setVisible(true); }, delay);
+  };
+
+  // Auto advance splash
   useEffect(() => {
     if (step !== 'splash') return;
-    const t = setTimeout(() => {
-      setFadeIn(false);
-      setTimeout(() => { setStep('gender'); setFadeIn(true); }, 400);
-    }, 2500);
+    const t = setTimeout(() => fade(() => setStep('gender')), 2800);
     return () => clearTimeout(t);
   }, [step]);
 
-  const goToName = () => {
-    if (!gender) return;
-    setFadeIn(false);
-    setTimeout(() => { setStep('name'); setFadeIn(true); }, 300);
-  };
-
-  const goToIntro = () => {
+  const submitName = () => {
     const name = nameInput.trim() || 'Player';
-    setFadeIn(false);
-    setTimeout(() => { setStep('intro'); setFadeIn(true); }, 300);
-    return name;
+    fade(() => { setStep('intro'); });
   };
 
   const nextPanel = () => {
     if (panelIdx < INTRO_PANELS.length - 1) {
-      setFadeIn(false);
-      setTimeout(() => { setPanelIdx(i => i + 1); setFadeIn(true); }, 250);
+      fade(() => setPanelIdx(i => i + 1), 200);
     } else {
-      const name = nameInput.trim() || 'Player';
-      onComplete({ gender, name });
+      onComplete({ gender, name: nameInput.trim() || 'Player' });
     }
   };
 
-  const submitName = () => {
-    goToIntro();
+  // ── Wrapper — selalu max 430px, centered ──────────────
+  const wrap = {
+    position: 'fixed', inset: 0,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: '#0a0a0a', zIndex: 500,
   };
-
-  // ── Shared styles ────────────────────────────────────
-  const screen = {
-    position: 'fixed', inset: 0, zIndex: 500,
-    background: '#040404',
+  const card = {
+    width: '100%', maxWidth: 430,
+    height: '100%', maxHeight: '100dvh',
     display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
-    padding: '0 32px',
-    opacity: fadeIn ? 1 : 0,
+    padding: '0 28px',
+    opacity: visible ? 1 : 0,
     transition: 'opacity 0.3s ease',
+    position: 'relative',
   };
 
   // ══════════════════════════════════════════════════════
-  // SPLASH SCREEN
+  // SPLASH
   // ══════════════════════════════════════════════════════
   if (step === 'splash') return (
-    <div style={screen}>
-      {/* Logo icon */}
-      <div style={{
-        fontSize: 72, marginBottom: 24,
-        animation: 'pulse 2s ease-in-out infinite',
-        filter: 'drop-shadow(0 0 30px #e8a24588)',
-      }}>
-        🍛
-      </div>
-
-      {/* Game title */}
-      <div style={{
-        fontFamily: "'Bebas Neue', sans-serif",
-        fontSize: 48, letterSpacing: 4,
-        color: '#e8a245',
-        textShadow: '0 0 40px #e8a24566',
-        marginBottom: 8, textAlign: 'center',
-      }}>
-        INCLICKER
-      </div>
-      <div style={{
-        fontFamily: "'Bebas Neue', sans-serif",
-        fontSize: 22, letterSpacing: 6,
-        color: 'rgba(255,255,255,0.4)',
-        marginBottom: 40, textAlign: 'center',
-      }}>
-        RESTO
-      </div>
-
-      {/* Tagline */}
-      <div style={{
-        fontSize: 13, color: 'rgba(255,255,255,0.25)',
-        fontFamily: "'DM Sans', sans-serif",
-        letterSpacing: 1, textAlign: 'center',
-        fontStyle: 'italic',
-      }}>
-        Dari gang sempit ke seluruh dunia
-      </div>
-
-      {/* Loading dots */}
-      <div style={{ position: 'absolute', bottom: 60, display: 'flex', gap: 6 }}>
-        {[0,1,2].map(i => (
-          <div key={i} style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: '#e8a245',
-            opacity: 0.4,
-            animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }}/>
-        ))}
+    <div style={wrap}>
+      <div style={card}>
+        <div style={{ fontSize: 80, marginBottom: 20, filter: 'drop-shadow(0 0 24px #e8a24566)' }}>
+          🍛
+        </div>
+        <div style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 52, letterSpacing: 5,
+          color: '#e8a245', lineHeight: 1,
+          textShadow: '0 0 40px #e8a24555',
+          marginBottom: 4,
+        }}>
+          INCLICKER
+        </div>
+        <div style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 20, letterSpacing: 8,
+          color: 'rgba(255,255,255,0.5)',
+          marginBottom: 48,
+        }}>
+          RESTO
+        </div>
+        <div style={{
+          fontSize: 14, color: 'rgba(255,255,255,0.35)',
+          fontFamily: "'DM Sans', sans-serif",
+          fontStyle: 'italic', letterSpacing: 0.5,
+        }}>
+          Dari gang sempit ke seluruh dunia
+        </div>
+        {/* dots */}
+        <div style={{ position: 'absolute', bottom: 48, display: 'flex', gap: 8 }}>
+          {[0,1,2].map(i => (
+            <div key={i} style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: '#e8a245', opacity: 0.5,
+              animation: `pulse 1.2s ease-in-out ${i*0.2}s infinite`,
+            }}/>
+          ))}
+        </div>
       </div>
     </div>
   );
 
   // ══════════════════════════════════════════════════════
-  // PILIH GENDER
+  // GENDER
   // ══════════════════════════════════════════════════════
   if (step === 'gender') return (
-    <div style={screen}>
-      <div style={{
-        fontFamily: "'DM Mono', monospace",
-        fontSize: 10, color: '#e8a245',
-        letterSpacing: 3, marginBottom: 12,
-      }}>
-        LANGKAH 1 / 2
-      </div>
-      <div style={{
-        fontFamily: "'Bebas Neue', sans-serif",
-        fontSize: 30, color: '#fff',
-        letterSpacing: 2, marginBottom: 8, textAlign: 'center',
-      }}>
-        PILIH KARAKTER
-      </div>
-      <div style={{
-        fontSize: 13, color: '#444',
-        fontFamily: "'DM Sans', sans-serif",
-        marginBottom: 40, textAlign: 'center',
-      }}>
-        Lo mau main sebagai siapa?
-      </div>
+    <div style={wrap}>
+      <div style={card}>
+        {/* Step indicator */}
+        <div style={{
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 11, color: '#e8a245',
+          letterSpacing: 3, marginBottom: 14,
+        }}>
+          1 / 2
+        </div>
 
-      {/* Gender cards */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 36, width: '100%', maxWidth: 320 }}>
-        {[
-          { id: 'male',   emoji: '👨🍳', label: 'Cowok' },
-          { id: 'female', emoji: '👩🍳', label: 'Cewek' },
-        ].map(g => (
-          <div
-            key={g.id}
-            onClick={() => setGender(g.id)}
-            style={{
-              flex: 1, padding: '28px 16px',
-              background: gender === g.id ? '#e8a24518' : 'rgba(255,255,255,0.03)',
-              border: `2px solid ${gender === g.id ? '#e8a245' : 'rgba(255,255,255,0.08)'}`,
-              borderRadius: 14, cursor: 'pointer',
-              textAlign: 'center',
-              transition: 'all 0.2s',
-              boxShadow: gender === g.id ? '0 0 24px #e8a24533' : 'none',
-            }}
-          >
-            <div style={{ fontSize: 48, marginBottom: 10 }}>{g.emoji}</div>
-            <div style={{
-              fontSize: 14, fontWeight: 600,
-              color: gender === g.id ? '#e8a245' : '#555',
-              fontFamily: "'DM Sans', sans-serif",
-            }}>
-              {g.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={goToName}
-        disabled={!gender}
-        style={{
-          width: '100%', maxWidth: 320, padding: '14px',
-          background: gender ? '#e8a245' : 'rgba(255,255,255,0.05)',
-          border: 'none', borderRadius: 12,
-          color: gender ? '#040404' : '#333',
+        <div style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 34, color: '#ffffff',
+          letterSpacing: 2, marginBottom: 8, textAlign: 'center',
+        }}>
+          PILIH KARAKTER
+        </div>
+        <div style={{
+          fontSize: 15, color: 'rgba(255,255,255,0.55)',
           fontFamily: "'DM Sans', sans-serif",
-          fontWeight: 700, fontSize: 15,
-          cursor: gender ? 'pointer' : 'not-allowed',
-          transition: 'all 0.2s',
-        }}
-      >
-        Lanjut →
-      </button>
+          marginBottom: 36, textAlign: 'center',
+        }}>
+          Lo mau main sebagai siapa?
+        </div>
+
+        {/* Cards */}
+        <div style={{ display: 'flex', gap: 14, width: '100%', marginBottom: 28 }}>
+          {[
+            { id: 'male',   emoji: '👨🍳', label: 'Cowok' },
+            { id: 'female', emoji: '👩🍳', label: 'Cewek' },
+          ].map(g => {
+            const selected = gender === g.id;
+            return (
+              <div key={g.id} onClick={() => setGender(g.id)} style={{
+                flex: 1, padding: '24px 12px 20px',
+                background: selected ? '#e8a24520' : 'rgba(255,255,255,0.04)',
+                border: `2px solid ${selected ? '#e8a245' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 16, cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 0.18s',
+                boxShadow: selected ? '0 0 20px #e8a24530' : 'none',
+              }}>
+                <div style={{ fontSize: 52, marginBottom: 10, lineHeight: 1 }}>{g.emoji}</div>
+                <div style={{
+                  fontSize: 16, fontWeight: 700,
+                  color: selected ? '#e8a245' : 'rgba(255,255,255,0.6)',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  {g.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button onClick={() => gender && fade(() => setStep('name'))} style={{
+          width: '100%', padding: '16px',
+          background: gender ? '#e8a245' : 'rgba(255,255,255,0.07)',
+          border: 'none', borderRadius: 14,
+          color: gender ? '#0a0a0a' : 'rgba(255,255,255,0.2)',
+          fontFamily: "'DM Sans', sans-serif",
+          fontWeight: 700, fontSize: 16,
+          cursor: gender ? 'pointer' : 'default',
+          transition: 'all 0.18s',
+          letterSpacing: 0.5,
+        }}>
+          Lanjut →
+        </button>
+      </div>
     </div>
   );
 
   // ══════════════════════════════════════════════════════
-  // INPUT NAMA
+  // NAMA
   // ══════════════════════════════════════════════════════
   if (step === 'name') return (
-    <div style={screen}>
-      <div style={{
-        fontFamily: "'DM Mono', monospace",
-        fontSize: 10, color: '#e8a245',
-        letterSpacing: 3, marginBottom: 12,
-      }}>
-        LANGKAH 2 / 2
-      </div>
-      <div style={{
-        fontFamily: "'Bebas Neue', sans-serif",
-        fontSize: 30, color: '#fff',
-        letterSpacing: 2, marginBottom: 8,
-      }}>
-        SIAPA NAMA LO?
-      </div>
-      <div style={{
-        fontSize: 13, color: '#444',
-        fontFamily: "'DM Sans', sans-serif",
-        marginBottom: 36, textAlign: 'center',
-        lineHeight: 1.6,
-      }}>
-        Nama lo akan muncul di semua dialog cerita
-      </div>
+    <div style={wrap}>
+      <div style={card}>
+        <div style={{
+          fontFamily: "'DM Mono', monospace",
+          fontSize: 11, color: '#e8a245',
+          letterSpacing: 3, marginBottom: 14,
+        }}>
+          2 / 2
+        </div>
 
-      <input
-        autoFocus
-        value={nameInput}
-        onChange={e => setNameInput(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && nameInput.trim() && submitName()}
-        placeholder="Ketik nama lo..."
-        maxLength={16}
-        style={{
-          width: '100%', maxWidth: 320,
-          padding: '14px 18px',
-          background: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: 12, color: '#fff',
-          fontSize: 18, fontFamily: "'DM Sans', sans-serif",
-          outline: 'none', textAlign: 'center',
-          marginBottom: 16,
-          caretColor: '#e8a245',
-        }}
-      />
-
-      <button
-        onClick={() => nameInput.trim() && submitName()}
-        disabled={!nameInput.trim()}
-        style={{
-          width: '100%', maxWidth: 320, padding: '14px',
-          background: nameInput.trim() ? '#e8a245' : 'rgba(255,255,255,0.05)',
-          border: 'none', borderRadius: 12,
-          color: nameInput.trim() ? '#040404' : '#333',
+        <div style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 34, color: '#ffffff',
+          letterSpacing: 2, marginBottom: 8,
+        }}>
+          SIAPA NAMA LO?
+        </div>
+        <div style={{
+          fontSize: 15, color: 'rgba(255,255,255,0.5)',
           fontFamily: "'DM Sans', sans-serif",
-          fontWeight: 700, fontSize: 15,
-          cursor: nameInput.trim() ? 'pointer' : 'not-allowed',
-          transition: 'all 0.2s',
-        }}
-      >
-        Mulai Cerita →
-      </button>
+          marginBottom: 36, textAlign: 'center',
+          lineHeight: 1.6,
+        }}>
+          Nama lo akan muncul di semua dialog cerita
+        </div>
 
-      {/* Back */}
-      <button onClick={() => { setStep('gender'); setFadeIn(true); }} style={{
-        marginTop: 16, background: 'none', border: 'none',
-        color: '#333', fontSize: 12, cursor: 'pointer',
-        fontFamily: "'DM Sans', sans-serif",
-      }}>
-        ← Kembali
-      </button>
+        <input
+          autoFocus
+          value={nameInput}
+          onChange={e => setNameInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && nameInput.trim() && submitName()}
+          placeholder="Nama lo..."
+          maxLength={16}
+          style={{
+            width: '100%', padding: '16px 20px',
+            background: 'rgba(255,255,255,0.07)',
+            border: '1.5px solid rgba(255,255,255,0.15)',
+            borderRadius: 14, color: '#ffffff',
+            fontSize: 20, fontFamily: "'DM Sans', sans-serif",
+            outline: 'none', textAlign: 'center',
+            marginBottom: 14,
+            caretColor: '#e8a245',
+          }}
+        />
+
+        <button
+          onClick={() => nameInput.trim() && submitName()}
+          style={{
+            width: '100%', padding: '16px',
+            background: nameInput.trim() ? '#e8a245' : 'rgba(255,255,255,0.07)',
+            border: 'none', borderRadius: 14,
+            color: nameInput.trim() ? '#0a0a0a' : 'rgba(255,255,255,0.2)',
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 700, fontSize: 16,
+            cursor: nameInput.trim() ? 'pointer' : 'default',
+            transition: 'all 0.18s',
+            marginBottom: 12,
+          }}
+        >
+          Mulai Cerita →
+        </button>
+
+        <button onClick={() => fade(() => setStep('gender'))} style={{
+          background: 'none', border: 'none',
+          color: 'rgba(255,255,255,0.3)', fontSize: 13,
+          cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+          padding: '8px',
+        }}>
+          ← Kembali
+        </button>
+      </div>
     </div>
   );
 
   // ══════════════════════════════════════════════════════
-  // VN INTRO (5 panel)
+  // VN INTRO
   // ══════════════════════════════════════════════════════
   if (step === 'intro') {
     const panel = INTRO_PANELS[panelIdx];
     return (
-      <div
-        onClick={nextPanel}
-        style={{
-          ...screen,
-          cursor: 'pointer',
-          justifyContent: 'flex-end',
-          padding: 0,
-        }}
-      >
-        {/* Dark overlay gradient */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse at center, #1a0f0088 0%, #040404 100%)',
-        }}/>
-
-        {/* Panel number */}
-        <div style={{
-          position: 'absolute', top: 20, right: 20,
-          fontFamily: "'DM Mono', monospace",
-          fontSize: 11, color: 'rgba(255,255,255,0.2)',
-        }}>
-          {panelIdx + 1} / {INTRO_PANELS.length}
-        </div>
-
-        {/* Big icon center */}
-        <div style={{
-          position: 'absolute',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -65%)',
-          fontSize: 90,
-          opacity: 0.08,
-          userSelect: 'none',
-        }}>
-          🍳
-        </div>
-
-        {/* Sub label */}
-        {panel.sub && (
+      <div style={wrap}>
+        <div
+          onClick={nextPanel}
+          style={{
+            width: '100%', maxWidth: 430,
+            height: '100%', maxHeight: '100dvh',
+            position: 'relative', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column',
+            justifyContent: 'flex-end',
+            background: '#0a0a0a',
+            opacity: visible ? 1 : 0,
+            transition: 'opacity 0.2s ease',
+          }}
+        >
+          {/* Background icon besar di tengah */}
           <div style={{
-            position: 'absolute',
-            top: '38%', left: '50%',
-            transform: 'translateX(-50%)',
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -60%)',
+            fontSize: 120, opacity: 0.06,
+            userSelect: 'none', pointerEvents: 'none',
+          }}>
+            🍳
+          </div>
+
+          {/* Sub label */}
+          <div style={{
+            position: 'absolute', top: '36%', width: '100%',
+            textAlign: 'center',
             fontFamily: "'DM Mono', monospace",
-            fontSize: 10, color: '#e8a245aa',
-            letterSpacing: 2, textAlign: 'center',
-            opacity: fadeIn ? 1 : 0,
-            transition: 'opacity 0.25s ease',
+            fontSize: 11, color: '#e8a245',
+            letterSpacing: 3, opacity: 0.8,
           }}>
-            {panel.sub.toUpperCase()}
+            {panel.sub?.toUpperCase()}
           </div>
-        )}
 
-        {/* Caption box */}
-        <div style={{
-          width: '100%',
-          background: 'linear-gradient(to top, #000000ee 0%, #000000aa 80%, transparent 100%)',
-          padding: '40px 28px 60px',
-          opacity: fadeIn ? 1 : 0,
-          transition: 'opacity 0.25s ease',
-        }}>
+          {/* Panel counter top right */}
           <div style={{
-            fontSize: 17, lineHeight: 1.7,
-            color: 'rgba(255,255,255,0.9)',
-            fontFamily: "'DM Sans', sans-serif",
-            fontStyle: 'italic',
-            marginBottom: 20,
-          }}>
-            {panel.caption}
-          </div>
-
-          {/* Progress dots */}
-          <div style={{ display: 'flex', gap: 5, marginBottom: 16 }}>
-            {INTRO_PANELS.map((_, i) => (
-              <div key={i} style={{
-                height: 3, borderRadius: 99,
-                width: i === panelIdx ? 20 : 6,
-                background: i === panelIdx ? '#e8a245' : 'rgba(255,255,255,0.15)',
-                transition: 'all 0.25s ease',
-              }}/>
-            ))}
-          </div>
-
-          <div style={{
-            fontSize: 11, color: 'rgba(255,255,255,0.2)',
+            position: 'absolute', top: 20, right: 20,
             fontFamily: "'DM Mono', monospace",
-            letterSpacing: 1.5,
+            fontSize: 12, color: 'rgba(255,255,255,0.25)',
           }}>
-            {panelIdx < INTRO_PANELS.length - 1 ? 'TAP UNTUK LANJUT' : 'TAP UNTUK MULAI'}
+            {panelIdx + 1}/{INTRO_PANELS.length}
+          </div>
+
+          {/* Caption box */}
+          <div style={{
+            padding: '36px 28px 52px',
+            background: 'linear-gradient(to top, #000000f5 0%, #000000cc 70%, transparent 100%)',
+          }}>
+            <div style={{
+              fontSize: 19, lineHeight: 1.7,
+              color: '#f5f5f5',
+              fontFamily: "'DM Sans', sans-serif",
+              fontStyle: 'italic',
+              marginBottom: 22,
+            }}>
+              {panel.caption}
+            </div>
+
+            {/* Progress dots */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+              {INTRO_PANELS.map((_, i) => (
+                <div key={i} style={{
+                  height: 3, borderRadius: 99,
+                  width: i === panelIdx ? 22 : 6,
+                  background: i === panelIdx ? '#e8a245' : 'rgba(255,255,255,0.2)',
+                  transition: 'all 0.25s ease',
+                }}/>
+              ))}
+            </div>
+
+            <div style={{
+              fontSize: 11, color: 'rgba(255,255,255,0.3)',
+              fontFamily: "'DM Mono', monospace", letterSpacing: 2,
+            }}>
+              {panelIdx < INTRO_PANELS.length - 1 ? 'TAP UNTUK LANJUT' : 'TAP UNTUK MULAI ▶'}
+            </div>
           </div>
         </div>
       </div>
